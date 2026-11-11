@@ -1,0 +1,275 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Panel Ejecutivo{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>Panel Ejecutivo de Control de Gestión</h2>
+        <p>Tareas, alertas y situación de gestión de la Municipalidad de Malagueño</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'tareas_lista' %}" class="btn alt">
+            <i class="fa-solid fa-list-check fa-fw"></i> Ver todas las tareas
+        </a>
+        <a href="{% url 'tarea_crear' %}" class="btn btn-primary" id="nuevo">
+            <i class="fa-solid fa-plus fa-fw"></i> Nueva tarea
+        </a>
+    </div>
+</header>
+
+<!-- 1. CARDS DE KPIS -->
+<div class="cards">
+    <div class="card card-blue">
+        <span class="card-label">Total Tareas</span>
+        <strong class="card-value">{{ kpis.total }}</strong>
+        <small class="muted"><i class="fa-solid fa-folder-open fa-fw"></i> Intervenciones registradas</small>
+    </div>
+
+    <div class="card card-green">
+        <span class="card-label">En Ejecución</span>
+        <strong class="card-value">{{ kpis.en_ejecucion }}</strong>
+        <small class="muted"><i class="fa-solid fa-gears fa-fw"></i> En desarrollo activo</small>
+    </div>
+
+    <div class="card card-orange">
+        <span class="card-label">Vencidas / Alertas</span>
+        <strong class="card-value" style="color: #c64b4b;">{{ kpis.vencidas }}</strong>
+        <small class="muted"><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Requieren atención urgente</small>
+    </div>
+
+    <div class="card card-purple">
+        <span class="card-label">Finalizadas</span>
+        <strong class="card-value" style="color: #2c9c70;">{{ kpis.finalizadas }}</strong>
+        <small class="muted"><i class="fa-solid fa-circle-check fa-fw"></i> Objetivos cumplidos</small>
+    </div>
+</div>
+
+<!-- 2. ESTADO OPERATIVO Y RESUMEN -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-chart-pie fa-fw" style="color: var(--blue);"></i> Distribución de tareas según estado</span>
+        <span class="muted" style="font-size: 13px; font-weight: normal;">
+            Bloqueadas: <b>{{ kpis.bloqueadas }}</b> · Por validar: <b>{{ kpis.para_validar }}</b>
+        </span>
+    </h3>
+    
+    <div class="actions" style="margin-top: 10px;">
+        <span class="pill"><span style="color: #297dbc;">●</span> En ejecución: {{ kpis.en_ejecucion }}</span>
+        <span class="pill wait"><span style="color: #d9a73d;">●</span> Pendientes: {{ kpis.pendientes }}</span>
+        <span class="pill" style="background:#f3e8ff; color:#7c3aed;"><span style="color: #7c3aed;">●</span> Por validar: {{ kpis.para_validar }}</span>
+        <span class="pill late"><span style="color: #d34f50;">●</span> Vencidas: {{ kpis.vencidas }}</span>
+        <span class="pill" style="background:#fee2e2; color:#991b1b;"><span style="color: #991b1b;">●</span> Bloqueadas: {{ kpis.bloqueadas }}</span>
+        <span class="pill done"><span style="color: #2b996b;">●</span> Finalizadas: {{ kpis.finalizadas }}</span>
+    </div>
+</div>
+
+<!-- 3. CONSOLIDADO PRESUPUESTARIO Y FINANCIERO -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-coins fa-fw" style="color: var(--color-primary);"></i> Presupuesto y ejecución financiera municipal (ARS)</span>
+        <span class="pill done">
+            <i class="fa-solid fa-chart-line fa-fw"></i> Ejecución Real: {{ kpis.finanzas.porcentaje_ejecucion_financiera }}%
+        </span>
+    </h3>
+    <p class="muted" style="margin-bottom: 16px;">
+        El avance presupuestario se mide por devengado y el avance financiero por pagos efectivamente liquidados.
+    </p>
+
+    <div class="finance-grid">
+        <div class="finance-box">
+            <small>Monto Contractual Actualizado (MCA)</small>
+            <b>${{ kpis.finanzas.monto_contractual_actualizado|floatformat:2 }}</b>
+        </div>
+        <div class="finance-box">
+            <small>Total Devengado</small>
+            <b>${{ kpis.finanzas.monto_devengado|floatformat:2 }}</b>
+        </div>
+        <div class="finance-box">
+            <small>Total Pagado Efectivo</small>
+            <b style="color: var(--color-primary);">${{ kpis.finanzas.monto_pagado|floatformat:2 }}</b>
+        </div>
+        <div class="finance-box">
+            <small>Devengado Pendiente de Pago</small>
+            <b style="color: #92400e;">${{ kpis.finanzas.devengado_pendiente_pago|floatformat:2 }}</b>
+        </div>
+    </div>
+
+    <div style="margin-top: 18px;">
+        <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; margin-bottom: 6px;">
+            <span>Avance Financiero General Pagado</span>
+            <span>{{ kpis.finanzas.porcentaje_ejecucion_financiera }}%</span>
+        </div>
+        <div class="progress-track">
+            <div style="width: {{ kpis.finanzas.porcentaje_ejecucion_financiera|unlocalize }}%;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. SEMÁFOROS POR SECRETARÍA -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-traffic-light fa-fw" style="color: var(--navy);"></i> Semáforo de salud operativa por secretaría</span>
+        <a href="{% url 'areas_lista' %}" class="btn alt btn-sm">
+            <i class="fa-solid fa-building-columns fa-fw"></i> Directorio completo
+        </a>
+    </h3>
+    <p class="muted" style="margin-bottom: 16px;">
+        Rojo: al menos una tarea vencida. Amarillo: tareas bloqueadas o por vencer. Verde: sin alertas pendientes.
+    </p>
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Área / Secretaría</th>
+                    <th>Responsable</th>
+                    <th>Semáforo</th>
+                    <th>Cumplimiento</th>
+                    <th>Vencidas / Bloqueadas</th>
+                    <th style="text-align: right;">Acción</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in semaforos_areas %}
+                <tr>
+                    <td>
+                        <a href="{% url 'area_detalle' item.area.pk %}" class="task-name-link">
+                            {{ item.area.nombre }}
+                        </a>
+                        <div class="muted">{{ item.area.codigo }}</div>
+                    </td>
+                    <td>
+                        <i class="fa-solid fa-user-tie fa-fw" style="color: var(--muted); margin-right: 4px;"></i>
+                        {{ item.area.responsable_nombre|default:"Sin asignar" }}
+                    </td>
+                    <td>
+                        {% if item.info.estado == 'VERDE' %}
+                            <span class="traffic green"><i></i> Al día</span>
+                        {% elif item.info.estado == 'AMARILLO' %}
+                            <span class="traffic yellow"><i></i> Atención</span>
+                        {% elif item.info.estado == 'ROJO' %}
+                            <span class="traffic red"><i></i> Crítico</span>
+                        {% else %}
+                            <span class="traffic gray"><i></i> Sin tareas</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 80px; height: 8px; background: #e7edf5; border-radius: 4px; overflow: hidden;">
+                                <div style="width: {{ item.info.porcentaje_cumplimiento|unlocalize }}%; background: var(--color-primary); height: 100%;"></div>
+                            </div>
+                            <span style="font-size: 12px; font-weight: 700;">{{ item.info.porcentaje_cumplimiento }}%</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span style="color: var(--color-status-red); font-weight: 700;">{{ item.info.vencidas }}</span> venc. / 
+                        <span style="color: var(--color-status-yellow); font-weight: 700;">{{ item.info.bloqueadas }}</span> bloq.
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'area_detalle' item.area.pk %}" class="btn alt btn-sm">
+                            <i class="fa-solid fa-arrow-right fa-fw"></i> Ficha
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- 5. TAREAS PRIORITARIAS PARA INTENDENCIA -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-star fa-fw" style="color: #e6a33e;"></i> Tareas prioritarias para Intendencia</span>
+        <a href="{% url 'tareas_lista' %}?prioritario=1" class="btn alt btn-sm">
+            <i class="fa-solid fa-arrow-up-right-from-square fa-fw"></i> Ver todas las prioritarias
+        </a>
+    </h3>
+    <p class="muted" style="margin-bottom: 16px;">
+        Intervenciones clave de seguimiento directo y estratégico por el Intendente Marcos Fey.
+    </p>
+
+    {% if tareas_prioritarias %}
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tarea / Intervención</th>
+                    <th>Área Principal</th>
+                    <th>Responsable</th>
+                    <th>Fecha Límite</th>
+                    <th>Estado</th>
+                    <th>Avance</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tareas_prioritarias %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="task-name-link">
+                            {{ t.titulo }}
+                        </a>
+                        <div class="muted">
+                            <i class="fa-solid fa-star" style="color: #e6a33e; margin-right: 3px;"></i> PRIORITARIO PARA INTENDENCIA
+                            {% if t.barrio_principal %}
+                                · <i class="fa-solid fa-location-dot" style="color: var(--color-primary); margin-right: 3px;"></i> {{ t.barrio_principal.nombre }}
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>{{ t.area_principal.codigo }}</td>
+                    <td>{{ t.responsable_operativo|default:"Sin asignar" }}</td>
+                    <td>
+                        {% if t.fecha_limite %}
+                            <span {% if t.esta_vencida %}style="color: var(--color-status-red); font-weight: bold;"{% endif %}>
+                                <i class="fa-regular fa-calendar-days fa-fw" style="margin-right: 3px;"></i>{{ t.fecha_limite|date:"d/m/Y" }}
+                            </span>
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if t.estado == 'FINALIZADA' %}
+                            <span class="pill done"><i class="fa-solid fa-check"></i> Finalizada</span>
+                        {% elif t.estado == 'EN_EJECUCION' %}
+                            <span class="pill"><i class="fa-solid fa-play"></i> En ejecución</span>
+                        {% elif t.estado == 'BLOQUEADA' %}
+                            <span class="pill late"><i class="fa-solid fa-ban"></i> Bloqueada</span>
+                        {% elif t.estado == 'PARA_VALIDAR' %}
+                            <span class="pill" style="background:#f3e8ff; color:#7c3aed;"><i class="fa-solid fa-clipboard-check"></i> Para validar</span>
+                        {% else %}
+                            <span class="pill wait"><i class="fa-regular fa-clock"></i> Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div style="width: 60px; height: 8px; background: #e7edf5; border-radius: 4px; overflow: hidden;">
+                                <div style="width: {{ t.porcentaje_general|unlocalize }}%; background: var(--color-primary); height: 100%;"></div>
+                            </div>
+                            <span style="font-size: 12px; font-weight: 700;">{{ t.porcentaje_general }}%</span>
+                        </div>
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="btn alt btn-sm" title="Seguimiento">
+                            <i class="fa-solid fa-comments fa-fw"></i> Seguimiento
+                        </a>
+                        <a href="{% url 'tarea_editar' t.pk %}" class="btn alt btn-sm" title="Editar">
+                            <i class="fa-solid fa-pen-to-square fa-fw"></i> Editar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty">
+            <i class="fa-solid fa-clipboard-check fa-2x" style="color: var(--muted); margin-bottom: 8px; display: block;"></i>
+            No hay tareas prioritarias para Intendencia pendientes de ejecución.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

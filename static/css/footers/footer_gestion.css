@@ -1,0 +1,16 @@
+/* Estilos del pie de página institucional */
+.main-footer {
+  padding: 16px 24px;
+  background-color: var(--color-bg-card);
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.825rem;
+  color: var(--color-text-muted);
+}
+
+.footer-copy strong {
+  color: var(--color-primary);
+}
+

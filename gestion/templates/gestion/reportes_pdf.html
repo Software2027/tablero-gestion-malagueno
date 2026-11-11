@@ -1,0 +1,582 @@
+{% load static %}
+{% load l10n %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informe ejecutivo de estado de situación · MALAGUEÑO</title>
+    
+    <!-- Favicon Oficial Isotipo Malagueño -->
+    <link rel="icon" type="image/png" href="{% static 'img/logo_iso_municipalidad.png' %}">
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/logo_iso_municipalidad.png' %}">
+    
+    <!-- Tipografía Institucional Ubuntu -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Ubuntu', system-ui, -apple-system, sans-serif;
+        }
+
+        body {
+            background-color: #f8fafc;
+            color: #1e293b;
+            font-size: 8.5pt;
+            line-height: 1.35;
+        }
+
+        .report-page-container {
+            max-width: 820px;
+            margin: 20px auto;
+            background: #ffffff;
+            padding: 32px 36px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+        }
+
+        .no-print-bar {
+            max-width: 820px;
+            margin: 16px auto 0;
+            background: #0f172a;
+            color: #ffffff;
+            padding: 10px 18px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+        }
+
+        .btn-print {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 7px 16px;
+            border-radius: 5px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s ease;
+        }
+        .btn-print:hover {
+            background: #1d4ed8;
+        }
+
+        /* HEADER */
+        .report-header {
+            margin-bottom: 18px;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+        .header-top img {
+            max-height: 40px;
+            width: auto;
+        }
+        .header-top-text {
+            color: #0c3613;
+            font-size: 9.5pt;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .report-title-main {
+            font-size: 16pt;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: -0.3px;
+            margin-top: 2px;
+        }
+        .report-subtitle {
+            font-size: 10pt;
+            font-weight: 500;
+            color: #475569;
+            margin-top: 2px;
+        }
+        .report-meta-line {
+            font-size: 8pt;
+            color: #64748b;
+            margin-top: 5px;
+            margin-bottom: 12px;
+        }
+        .header-rule {
+            height: 2px;
+            background-color: #003366;
+            margin-bottom: 18px;
+        }
+
+        /* 4 CARDS SUPERIORES */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 22px;
+        }
+        .kpi-box {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 10px 14px;
+            background: #ffffff;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }
+        .kpi-num {
+            font-size: 18pt;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+        .kpi-lbl {
+            font-size: 8.5pt;
+            color: #475569;
+            font-weight: 500;
+        }
+
+        /* TITULOS DE SECCIONES */
+        .section-heading {
+            font-size: 10.5pt;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 20px;
+            margin-bottom: 6px;
+        }
+        .section-desc {
+            font-size: 7.5pt;
+            color: #64748b;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+
+        /* 1. SITUACION GENERAL */
+        .finanzas-resumen-line {
+            font-size: 8pt;
+            color: #334155;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .finanzas-resumen-line span {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        /* BARRA SEGMENTADA CONTINUA APILADA */
+        .stacked-bar-container {
+            width: 100%;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            display: flex;
+            margin-bottom: 8px;
+        }
+        .segment-fin {
+            background-color: #16a34a;
+            height: 100%;
+        }
+        .segment-eje {
+            background-color: #2563eb;
+            height: 100%;
+        }
+        .segment-ven {
+            background-color: #dc2626;
+            height: 100%;
+        }
+        .segment-otr {
+            background-color: #eab308;
+            height: 100%;
+        }
+
+        .bar-legend-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 7.5pt;
+            color: #475569;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+
+        /* TABLAS DE REPORTE */
+        table.report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 7.5pt;
+            margin-bottom: 10px;
+        }
+        table.report-table th {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-weight: 700;
+            text-align: left;
+            padding: 6px 8px;
+            border-bottom: 1px solid #cbd5e1;
+            font-size: 7.5pt;
+        }
+        table.report-table td {
+            padding: 5px 8px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #334155;
+            vertical-align: middle;
+        }
+        table.report-table tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        /* PUNTOS DE SEMAFORO */
+        .status-dot {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 7pt;
+            font-weight: 600;
+        }
+        .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .dot-gray { background-color: #94a3b8; }
+        .dot-red { background-color: #dc2626; }
+        .dot-yellow { background-color: #d97706; }
+        .dot-green { background-color: #16a34a; }
+
+        .text-gray { color: #64748b; }
+        .text-red { color: #dc2626; font-weight: 700; }
+        .text-yellow { color: #d97706; font-weight: 700; }
+        .text-green { color: #16a34a; font-weight: 700; }
+
+        /* BARRA DE AVANCE EN TABLA */
+        .mini-progress-box {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .mini-progress-track {
+            width: 60px;
+            height: 5px;
+            background-color: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .mini-progress-fill {
+            background-color: #16a34a;
+            height: 100%;
+        }
+
+        .footer-note {
+            font-size: 7pt;
+            color: #64748b;
+            margin-top: 6px;
+            margin-bottom: 16px;
+            line-height: 1.4;
+        }
+
+        /* PAGE BREAK PRINT */
+        .page-divider {
+            page-break-before: always;
+            margin-top: 30px;
+        }
+
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .no-print-bar {
+                display: none !important;
+            }
+            .report-page-container {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+            @page {
+                size: A4 portrait;
+                margin: 12mm 14mm;
+            }
+            .page-divider {
+                page-break-before: always !important;
+                margin-top: 0;
+                padding-top: 12mm;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- BARRA DE ACCIÓN NO IMPRIMIBLE -->
+    <div class="no-print-bar">
+        <div>
+            <i class="fa-solid fa-file-pdf fa-fw"></i> <strong>Informe ejecutivo de estado de situación</strong> · Municipalidad de Malagueño
+        </div>
+        <button onclick="window.print()" class="btn-print">
+            <i class="fa-solid fa-print"></i> Guardar como PDF / Imprimir
+        </button>
+    </div>
+
+    <div class="report-page-container">
+
+        <!-- CABECERA INSTITUCIONAL -->
+        <header class="report-header">
+            <div class="header-top">
+                <img src="{% static 'img/logo_iso_municipalidad.png' %}" alt="Malagueño">
+                <div class="header-top-text">Municipalidad de Malagueño</div>
+            </div>
+            <div class="report-title-main">MALAGUEÑO</div>
+            <div class="report-subtitle">Informe ejecutivo de estado de situación</div>
+            <div class="report-meta-line">
+                Generado: {{ fecha_hora_generado }} &bull; Alcance: {{ alcance_informe }}
+            </div>
+            <div class="header-rule"></div>
+        </header>
+
+        <!-- 4 CARDS SUPERIORES -->
+        <div class="kpi-row">
+            <div class="kpi-box">
+                <div class="kpi-num">{{ total_tareas }}</div>
+                <div class="kpi-lbl">Tareas</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-num">{{ total_finalizados }}</div>
+                <div class="kpi-lbl">Finalizados</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-num">{{ total_en_ejecucion }}</div>
+                <div class="kpi-lbl">En ejecución</div>
+            </div>
+            <div class="kpi-box">
+                <div class="kpi-num">{{ total_vencidos }}</div>
+                <div class="kpi-lbl">Vencidos</div>
+            </div>
+        </div>
+
+        <!-- 1. SITUACIÓN GENERAL -->
+        <div class="section-heading">1. Situación general</div>
+        <div class="finanzas-resumen-line">
+            Monto contractual actualizado: <span>${{ finanzas.monto_contractual_actualizado|floatformat:0 }}</span> &bull; 
+            Comprometido: <span>${{ finanzas.monto_adjudicado|floatformat:0 }}</span> &bull; 
+            Devengado: <span>${{ finanzas.monto_devengado|floatformat:0 }}</span> &bull; 
+            Pagado: <span>${{ finanzas.monto_pagado|floatformat:0 }}</span> &bull; 
+            Pagos en trámite: <span>${{ finanzas.pagos_en_tramite|floatformat:0 }}</span>
+        </div>
+
+        <!-- BARRA SEGMENTADA APILADA -->
+        <div class="stacked-bar-container">
+            <div class="segment-fin" style="width: {{ pct_finalizados|unlocalize }}%;"></div>
+            <div class="segment-eje" style="width: {{ pct_en_ejecucion|unlocalize }}%;"></div>
+            <div class="segment-ven" style="width: {{ pct_vencidos|unlocalize }}%;"></div>
+            <div class="segment-otr" style="width: {{ pct_otros|unlocalize }}%;"></div>
+        </div>
+
+        <div class="bar-legend-row">
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #16a34a;"></span>
+                Finalizados {{ total_finalizados }} ({{ pct_finalizados }}%)
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #2563eb;"></span>
+                En ejecución {{ total_en_ejecucion }} ({{ pct_en_ejecucion }}%)
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #dc2626;"></span>
+                Vencidos {{ total_vencidos }} ({{ pct_vencidos }}%)
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #eab308;"></span>
+                Otros {{ total_otros }} ({{ pct_otros }}%)
+            </div>
+        </div>
+
+        <!-- 2. SEMÁFORO Y ESTADO POR ÁREA -->
+        <div class="section-heading">2. Semáforo y estado por área</div>
+        <div class="section-desc">
+            Rojo: al menos una tarea vencida. Amarillo: tareas bloqueadas o que vencen dentro de siete días. Verde: sin alertas. Gris: sin tareas registradas.
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 44%;">Área</th>
+                    <th style="width: 20%;">Semáforo</th>
+                    <th style="width: 8%; text-align: center;">Total</th>
+                    <th style="width: 10%; text-align: center;">Finalizados</th>
+                    <th style="width: 9%; text-align: center;">Vencidos</th>
+                    <th style="width: 9%; text-align: right;">Avance</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in matriz_areas %}
+                <tr>
+                    <td><b>{{ a.nombre }}</b></td>
+                    <td>
+                        <div class="status-dot">
+                            <span class="dot dot-{{ a.sem_class }}"></span>
+                            <span class="text-{{ a.sem_class }}">{{ a.sem_label }}</span>
+                        </div>
+                    </td>
+                    <td style="text-align: center;">{{ a.total }}</td>
+                    <td style="text-align: center;">{{ a.finalizados }}</td>
+                    <td style="text-align: center;">{{ a.vencidos }}</td>
+                    <td style="text-align: right;">
+                        <div class="mini-progress-box" style="justify-content: flex-end;">
+                            <div class="mini-progress-track">
+                                <div class="mini-progress-fill" style="width: {{ a.avance|unlocalize }}%;"></div>
+                            </div>
+                            <span style="font-weight: 600; min-width: 24px; text-align: right;">{{ a.avance }}%</span>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="footer-note">
+            Las tareas interáreas se contabilizan en cada dependencia participante. Por eso la suma por áreas puede superar el total general.
+        </div>
+
+        <!-- PÁGINA 2 / SECCIONES 3, 4 Y 5 -->
+        <div class="page-divider"></div>
+
+        <!-- 3. CINCO TEMAS PRIORITARIOS -->
+        <div class="section-heading">3. Cinco temas prioritarios</div>
+        <div class="section-desc">
+            Tareas abiertas: primero las marcadas como prioritarias para Intendencia y luego por nivel de prioridad y fecha de vencimiento.
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 32%;">Tarea</th>
+                    <th style="width: 30%;">Área</th>
+                    <th style="width: 18%;">Responsable</th>
+                    <th style="width: 10%;">Vence</th>
+                    <th style="width: 10%;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in cinco_prioritarios %}
+                <tr>
+                    <td><b>{{ t.titulo }}</b></td>
+                    <td>{{ t.area_principal.nombre }}</td>
+                    <td>{{ t.responsable_operativo|default:"—" }}</td>
+                    <td>{{ t.fecha_limite|date:"Y-m-d"|default:"—" }}</td>
+                    <td>{{ t.get_estado_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 12px;">No hay tareas prioritarias abiertas actualmente.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 4. CINCO PRÓXIMOS A VENCER -->
+        <div class="section-heading">4. Cinco próximos a vencer</div>
+        <div class="section-desc">
+            Tareas abiertas con fecha límite igual o posterior a hoy, ordenados por cercanía.
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 32%;">Tarea</th>
+                    <th style="width: 30%;">Área</th>
+                    <th style="width: 18%;">Responsable</th>
+                    <th style="width: 10%;">Vence</th>
+                    <th style="width: 10%;">Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in cinco_proximos_a_vencer %}
+                <tr>
+                    <td><b>{{ t.titulo }}</b></td>
+                    <td>{{ t.area_principal.nombre }}</td>
+                    <td>{{ t.responsable_operativo|default:"—" }}</td>
+                    <td>{{ t.fecha_limite|date:"Y-m-d"|default:"—" }}</td>
+                    <td>{{ t.get_estado_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #94a3b8; padding: 12px;">No hay tareas próximas a vencer en el período previsto.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- 5. INVERSIÓN E IMPACTO POR BARRIO -->
+        <div class="section-heading">5. Inversión e impacto por barrio</div>
+        <div class="section-desc">
+            Inversión asignada al barrio principal, sin duplicar tareas interáreas ni barrios adicionales. Las cantidades de beneficiarios pueden contener personas repetidas entre intervenciones.
+        </div>
+
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th style="width: 22%;">Barrio</th>
+                    <th style="width: 7%; text-align: center;">Tareas</th>
+                    <th style="width: 16%; text-align: right;">Monto contractual actualizado</th>
+                    <th style="width: 13%; text-align: right;">Pagado</th>
+                    <th style="width: 11%; text-align: center;">Viviendas directas</th>
+                    <th style="width: 11%; text-align: center;">Viviendas indirectas</th>
+                    <th style="width: 10%; text-align: center;">Personas directas</th>
+                    <th style="width: 10%; text-align: center;">Personas indirectas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in matriz_barrios_impacto %}
+                <tr>
+                    <td><b>{{ b.nombre }}</b></td>
+                    <td style="text-align: center;">{{ b.tareas_count }}</td>
+                    <td style="text-align: right;">${{ b.mca|floatformat:0 }}</td>
+                    <td style="text-align: right;">${{ b.pagado|floatformat:0 }}</td>
+                    <td style="text-align: center;">{{ b.viv_directas }}</td>
+                    <td style="text-align: center;">{{ b.viv_indirectas }}</td>
+                    <td style="text-align: center;">{{ b.per_directas }}</td>
+                    <td style="text-align: center;">{{ b.per_indirectas }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" style="text-align: center; color: #94a3b8; padding: 12px;">No hay barrios con intervenciones registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <div class="footer-note" style="margin-top: 10px;">
+            Datos de viviendas base según relevamiento territorial aportado, sin fecha informada.<br>
+            Reporte generado a partir de los datos visibles en MALAGUEÑO. No constituye una certificación administrativa.
+        </div>
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual de Operación y Roles · MALAGUEÑO</title>
+    <style>
+        :root {
+            --primary: #338c33;
+            --primary-dark: #0C3613;
+            --navy: #102b4f;
+            --blue: #246da8;
+            --muted: #64748b;
+            --border: #e2e8f0;
+            --bg-light: #f8fafc;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #1e293b;
+            background-color: #f1f5f9;
+            line-height: 1.6;
+            font-size: 15px;
+            padding: 16px;
+        }
+        .container {
+            max-width: 820px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px 20px;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border);
+        }
+        @media print {
+            body {
+                background: #ffffff;
+                padding: 0;
+            }
+            .container {
+                box-shadow: none;
+                border: none;
+                padding: 0;
+                max-width: 100%;
+            }
+        }
+        .header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .header-title h1 {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary-dark);
+            line-height: 1.25;
+        }
+        .header-title p {
+            font-size: 13px;
+            color: var(--muted);
+            margin-top: 4px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .badge-muni {
+            background: #eaf4ea;
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 5px 10px;
+            border-radius: 8px;
+            border: 1px solid #c2e2c5;
+            white-space: nowrap;
+        }
+        h2 {
+            font-size: 17px;
+            font-weight: 800;
+            color: var(--navy);
+            margin: 28px 0 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 6px;
+        }
+        h3 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary-dark);
+            margin: 18px 0 8px;
+        }
+        p {
+            margin-bottom: 12px;
+            color: #334155;
+            font-size: 14px;
+        }
+        ul, ol {
+            margin: 8px 0 16px 20px;
+            font-size: 14px;
+            color: #334155;
+        }
+        li {
+            margin-bottom: 6px;
+        }
+        .flow-diagram {
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--navy);
+            text-align: center;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: left;
+            background: #ffffff;
+            min-width: 520px;
+        }
+        th {
+            background: #f8fafc;
+            color: var(--navy);
+            font-weight: 700;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .role-card {
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border);
+        }
+        .role-card.sec {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+        .role-card.sup {
+            background: #f0f7fd;
+            border-color: #bcd7ef;
+        }
+        .role-card h4 {
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .role-card.sec h4 {
+            color: #166534;
+        }
+        .role-card.sup h4 {
+            color: #1e5ba4;
+        }
+        .step-badge {
+            display: inline-block;
+            background: #ffffff;
+            border: 1px solid #cbd5e1;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-right: 6px;
+            color: var(--navy);
+        }
+        .alert-box {
+            background: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 13px;
+            color: #92400e;
+        }
+        .footer-note {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 11.5px;
+            color: #94a3b8;
+            border-top: 1px solid var(--border);
+            padding-top: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Encabezado Oficial -->
+        <div class="header">
+            <div class="header-title">
+                <h1>Manual Integral de Operación y Roles</h1>
+                <p>Municipalidad de Malagueño · Gestión 2023 - 2027</p>
+            </div>
+            <div class="badge-muni">MALAGUEÑO</div>
+        </div>
+
+        <!-- 1. Objetivo -->
+        <h2>1. Objetivo del Sistema</h2>
+        <p><b>Objetivo General:</b> Centralizar, monitorear y auditar en tiempo real la planificación, ejecución operativa, cobertura territorial e inversión presupuestaria de todas las obras y servicios municipales, dotando al Intendente y a las Secretarías de una herramienta unificada para la toma de decisiones estratégicas.</p>
+        
+        <p><b>Objetivos Específicos:</b></p>
+        <ul>
+            <li><b>Trazabilidad Total:</b> Auditoría automática e inmutable (AuditLog) de cada movimiento en la base de datos.</li>
+            <li><b>Control Preventivo de Plazos:</b> Semáforos de salud operativa para anticipar vencimientos y destrabar bloqueos.</li>
+            <li><b>Transparencia Presupuestaria:</b> Separación estricta entre presupuesto oficial, contratos actualizados (MCA), devengado contable y pagos reales.</li>
+            <li><b>Equidad Territorial:</b> Control georreferenciado de inversión y beneficiarios directos e indirectos en los 31 barrios de Malagueño.</li>
+            <li><b>Validación Superior:</b> Garantizar que ningún proyecto de alta prioridad estratégica se cierre sin certificación formal de Intendencia o Asesoría Técnica.</li>
+        </ul>
+
+        <!-- 2. Alcance -->
+        <h2>2. Alcance del Sistema</h2>
+        <div class="flow-diagram">
+            <b>Cobertura Ejecutiva:</b> 14 Secretarías Municipales y Direcciones Ejecutoras<br>
+            <b>Cobertura Territorial:</b> 31 Barrios del Ejido Municipal (Abiertos y Cerrados)<br>
+            <b>Herramientas de Salida:</b> Panel Ejecutivo en Vivo · Informes Oficiales en PDF · Exportación CSV · Respaldo JSON
+        </div>
+
+        <!-- 3. Matriz de Roles -->
+        <h2>3. Matriz de Roles y Permisos</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Acción / Característica</th>
+                        <th>INTENDENCIA</th>
+                        <th>ASESORÍA TÉCNICA</th>
+                        <th>SECRETARÍA</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><b>Nivel Jerárquico</b></td>
+                        <td>Nivel 1 (Superior)</td>
+                        <td>Nivel 2 (Supervisión)</td>
+                        <td>Nivel 3 (Operativo)</td>
+                    </tr>
+                    <tr>
+                        <td><b>Visibilidad de Tareas</b></td>
+                        <td>Total (Todas las áreas)</td>
+                        <td>Total (Todas las áreas)</td>
+                        <td>Solo su Secretaría y articulaciones</td>
+                    </tr>
+                    <tr>
+                        <td><b>Crear / Editar Tareas</b></td>
+                        <td>Total (Cualquier área)</td>
+                        <td>Total (Cualquier área)</td>
+                        <td>Solo de su propia Secretaría</td>
+                    </tr>
+                    <tr>
+                        <td><b>Marcar Prioritario Intendencia (★)</b></td>
+                        <td><b>Sí</b></td>
+                        <td><b>Sí</b></td>
+                        <td>No (Restringido)</td>
+                    </tr>
+                    <tr>
+                        <td><b>Finalizar Tareas Ordinarias</b></td>
+                        <td>Sí</td>
+                        <td>Sí</td>
+                        <td>Sí</td>
+                    </tr>
+                    <tr>
+                        <td><b>Finalizar Tareas Prioritarias (★)</b></td>
+                        <td><b>Sí (Exclusivo)</b></td>
+                        <td><b>Sí (Exclusivo)</b></td>
+                        <td><b>No (Debe enviar a 'Para Validar')</b></td>
+                    </tr>
+                    <tr>
+                        <td><b>Aprobar / Rechazar Resoluciones</b></td>
+                        <td><b>Sí</b></td>
+                        <td><b>Sí</b></td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><b>Módulo de Datos y Respaldo JSON</b></td>
+                        <td><b>Sí (Exclusivo)</b></td>
+                        <td><b>Sí (Exclusivo)</b></td>
+                        <td>No (Oculto)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 4. Paso a Paso por Rol -->
+        <h2>4. Funcionamiento Paso a Paso según el Rol</h2>
+
+        <!-- Rol Secretaría -->
+        <div class="role-card sec">
+            <h4><span class="step-badge">ROL</span> SECRETARÍA (Gestión Operativa y Sectorial)</h4>
+            
+            <p><b>Paso 1: Inicio de Sesión y Ámbito</b><br>
+            El usuario ingresa con sus credenciales institucionales (ej. <code>sec.obras</code>). La plataforma adapta el menú y exhibe únicamente los proyectos donde su área es responsable o interviniente.</p>
+
+            <p><b>Paso 2: Carga en 5 Secciones ("Nueva Tarea")</b></p>
+            <ul>
+                <li><b>1. Identificación:</b> Título de la obra o servicio, descripción clara, dirección ejecutora y responsable operativo.</li>
+                <li><b>2. Planificación:</b> Estado inicial (<i>Pendiente</i> o <i>En ejecución</i>), fecha límite y avances estimados.</li>
+                <li><b>3. Presupuesto:</b> Carga opcional de valores económicos (Presupuesto Oficial, Monto Adjudicado, Redeterminaciones, Ampliaciones, Devengado, Pagado y En Trámite). Si no maneja dinero, se deja en <code>$ 0,00</code>.</li>
+                <li><b>4. Territorialidad:</b> Barrio principal (donde se imputa el 100% de la inversión) y beneficiarios (por viviendas × 3,5 o personas individuales).</li>
+                <li><b>5. Observaciones:</b> Comentarios de contexto o justificación de bloqueo si la tarea está demorada.</li>
+            </ul>
+
+            <p><b>Paso 3: Actualización Continua</b><br>
+            A medida que la obra progresa, se actualizan los porcentajes de avance físico y se registran nuevos certificados y pagos. Si la tarea se frena, se pasa a <i>"Bloqueada"</i> detallando obligatoriamente el motivo.</p>
+
+            <p><b>Paso 4: Cierre de la Tarea</b><br>
+            • <b>Si la tarea es Ordinaria:</b> Se cambia el estado a <b>"Finalizada"</b> y se guarda.<br>
+            • <b>Si la tarea tiene Prioridad de Intendencia (★):</b> El selector bloquea la opción <i>Finalizada</i>. La Secretaría debe pasarla a <b>"Para Validar"</b> para que la conducción superior la certifique.</p>
+        </div>
+
+        <!-- Rol Intendencia / Asesoría -->
+        <div class="role-card sup">
+            <h4><span class="step-badge">ROL</span> INTENDENCIA Y ASESORÍA TÉCNICA (Conducción Superior)</h4>
+            
+            <p><b>Paso 1: Monitoreo del Panel Ejecutivo</b><br>
+            Acceso global a las métricas del Municipio, balance financiero consolidado (MCA, Devengado, Pagado, Deuda Flotante) y el <b>Semáforo de Salud Operativa</b> de las 14 dependencias municipales.</p>
+
+            <p><b>Paso 2: Asignación de Prioridad Estratégica (★)</b><br>
+            Pueden activar el marcador <code>★ PRIORITARIO PARA INTENDENCIA</code> en cualquier tarea que requiera seguimiento directo del Intendente, ubicándola en la cima del tablero y exigiendo validación obligatoria.</p>
+
+            <p><b>Paso 3: Auditoría y Resolución de Tareas "Para Validar"</b><br>
+            Cuando una Secretaría concluye una tarea prioritaria, Intendencia o Asesoría Técnica audita el proyecto y resuelve:
+            <br>• <b>Aprobar Finalización:</b> Se valida la obra y pasa a <b>"Finalizada"</b> formalmente.
+            <br>• <b>Rechazar con Justificación:</b> Si restan detalles técnicos o contables, se rechaza indicando el motivo y la tarea vuelve a <i>"En ejecución"</i> para que la secretaría la corrija.</p>
+
+            <p><b>Paso 4: Reportes Ejecutivos y Respaldo de Base de Datos</b><br>
+            Generación del Informe PDF oficial de 5 secciones y acceso al módulo de <b>Datos y Respaldo</b> para exportar e importar instantáneas JSON de la base de datos municipal.</p>
+        </div>
+
+        <!-- 5. Reglas de Negocio -->
+        <h2>5. Reglas de Negocio Blindadas</h2>
+        
+        <div class="alert-box">
+            <b>1. Regla Contable Obligatoria:</b><br>
+            <code>Monto Pagado ≤ Monto Devengado ≤ Monto Contractual Actualizado (MCA)</code><br>
+            El sistema impide registrar pagos por encima de los certificados conformados (devengado).
+        </div>
+
+        <p>• <b>Imputación Territorial Cero Duplicación:</b> El monto total del contrato (MCA) se asocia únicamente al Barrio Principal. Los barrios adicionales son solo para fines estadísticos sin duplicar el presupuesto municipal.<br>
+        • <b>Trazabilidad Automática (AuditLog):</b> Cada modificación de montos, estados o fechas queda registrada de manera inmutable con usuario, fecha, hora y valores anteriores.</p>
+
+        <div class="footer-note">
+            Municipalidad de Malagueño · Plataforma de Control de Gestión · Versión Oficial 2026
+        </div>
+    </div>
+</body>
+</html>

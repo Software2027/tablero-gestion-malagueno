@@ -1,0 +1,47 @@
+# Entornos virtuales de Python
+venv/
+.venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Bytecode Python y caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Migraciones de Django (se ignora todo el contenido excepto __init__.py)
+gestion/migrations/*
+!gestion/migrations/__init__.py
+
+# Archivos multimedia subidos por usuarios
+media/
+
+# Archivos estáticos recolectados
+staticfiles/
+
+# Base de datos local
+*.sqlite3
+*.db
+
+# Variables de entorno y credenciales
+.env
+.env.local
+*.env
+
+# Logs del sistema
+*.log
+
+# IDEs, editores y configuraciones locales
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini

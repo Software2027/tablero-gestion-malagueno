@@ -1,0 +1,88 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+
+{% block title %}Validación de Tarea #{{ tarea.id }}{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>Validación y resolución de tarea</h2>
+        <p>Revisión ejecutiva de conformidad para finalización de obras y gestiones</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'tareas_lista' %}" class="btn alt">
+            <i class="fa-solid fa-arrow-left fa-fw"></i> Volver al listado
+        </a>
+    </div>
+</header>
+
+<div class="panel" style="max-width: 760px; margin: 0 auto;">
+    <h3><i class="fa-solid fa-clipboard-check fa-fw"></i> Tarea #{{ tarea.id }}: {{ tarea.titulo }}</h3>
+    
+    <div class="info-grid">
+        <div>
+            <small>Área principal</small>
+            <b>{{ tarea.area_principal.nombre }}</b>
+        </div>
+        <div>
+            <small>Responsable</small>
+            <b>{{ tarea.responsable_operativo|default:"No especificado" }}</b>
+        </div>
+        <div>
+            <small>Avance físico</small>
+            <b>{{ tarea.porcentaje_fisico }}%</b>
+        </div>
+        <div>
+            <small>Avance financiero</small>
+            <b>{{ tarea.porcentaje_financiero }}%</b>
+        </div>
+        <div>
+            <small>Monto pagado</small>
+            <b style="color: var(--color-primary);">${{ tarea.monto_pagado|floatformat:2 }}</b>
+        </div>
+        <div>
+            <small>Monto total (MCA)</small>
+            <b>${{ tarea.monto_contractual_actualizado|floatformat:2 }}</b>
+        </div>
+    </div>
+
+    {% if form.errors %}
+    <div class="note barrio-warning" style="margin-top: 16px;">
+        <i class="fa-solid fa-triangle-exclamation fa-fw"></i>
+        {{ form.motivo_rechazo.errors|default:"Por favor complete los campos obligatorios." }}
+    </div>
+    {% endif %}
+
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <div class="field">
+            <label style="font-size: 13px;">Resolución de Intendencia / Asesoría Técnica *</label>
+            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+                {% for radio in form.accion %}
+                    <label style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; background-color: #f8fbff; border: 1px solid var(--border); border-radius: 9px; cursor: pointer;">
+                        {{ radio.tag }}
+                        <span style="font-weight: 700; color: #15395e;">{{ radio.choice_label }}</span>
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="field" style="margin-top: 18px;">
+            <label for="id_motivo_rechazo">Motivo / Fundamentación de la resolución</label>
+            {{ form.motivo_rechazo }}
+            <small class="muted">
+                <i class="fa-solid fa-circle-info fa-fw"></i> En caso de rechazo, este fundamento es obligatorio y se registrará en la línea de tiempo de la secretaría.
+            </small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+            <a href="{% url 'tareas_lista' %}" class="btn alt">
+                <i class="fa-solid fa-xmark fa-fw"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-check-double fa-fw"></i> Confirmar resolución
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

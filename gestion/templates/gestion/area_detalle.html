@@ -1,0 +1,249 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Situación: {{ area.nombre }}{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <h2>{{ area.nombre }}</h2>
+            {% if semaforo.estado == 'VERDE' %}
+                <span class="traffic green"><i></i> Al día</span>
+            {% elif semaforo.estado == 'AMARILLO' %}
+                <span class="traffic yellow"><i></i> Atención</span>
+            {% elif semaforo.estado == 'ROJO' %}
+                <span class="traffic red"><i></i> Crítico</span>
+            {% else %}
+                <span class="traffic gray"><i></i> Sin tareas</span>
+            {% endif %}
+        </div>
+        <p>Titular: <b>{{ area.responsable_nombre|default:"Sin asignar" }}</b> · Código: <span style="color: {{ area.color_identificador }}; font-weight: 700;">{{ area.codigo }}</span></p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'areas_lista' %}" class="btn alt">
+            <i class="fa-solid fa-arrow-left fa-fw"></i> Volver al directorio
+        </a>
+    </div>
+</header>
+
+<!-- CARDS FINANCIEROS Y OPERATIVOS -->
+<div class="cards">
+    <div class="card card-blue">
+        <span class="card-label">Monto Contractual (MCA)</span>
+        <strong class="card-value">${{ finanzas.monto_contractual_actualizado|floatformat:2 }}</strong>
+        <small class="muted"><i class="fa-solid fa-file-contract fa-fw"></i> Presupuesto total asignado</small>
+    </div>
+
+    <div class="card card-orange">
+        <span class="card-label">Total Devengado</span>
+        <strong class="card-value">${{ finanzas.monto_devengado|floatformat:2 }}</strong>
+        <small class="muted"><i class="fa-solid fa-receipt fa-fw"></i> Compromisos exigibles</small>
+    </div>
+
+    <div class="card card-green">
+        <span class="card-label">Pagado Efectivo</span>
+        <strong class="card-value" style="color: var(--color-primary);">${{ finanzas.monto_pagado|floatformat:2 }}</strong>
+        <small class="muted"><i class="fa-solid fa-money-bill-wave fa-fw"></i> Egresos liquidados</small>
+    </div>
+
+    <div class="card card-purple">
+        <span class="card-label">Saldo por Ejecutar</span>
+        <strong class="card-value">${{ finanzas.saldo_por_ejecutar|floatformat:2 }}</strong>
+        <small class="muted"><i class="fa-solid fa-vault fa-fw"></i> Remanente disponible</small>
+    </div>
+</div>
+
+<!-- SALUD OPERATIVA DEL ÁREA -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-heart-pulse fa-fw" style="color: var(--color-primary);"></i> Salud operativa y cumplimiento</span>
+        <span class="pill done">Cumplimiento: {{ semaforo.porcentaje_cumplimiento }}%</span>
+    </h3>
+    <p class="muted">{{ semaforo.mensaje }}</p>
+
+    <div class="detail-progress">
+        <div style="width: {{ semaforo.porcentaje_cumplimiento|unlocalize }}%;"></div>
+    </div>
+
+    <div class="info-grid">
+        <div>
+            <small>Total tareas registradas</small>
+            <b>{{ semaforo.total_tareas }}</b>
+        </div>
+        <div>
+            <small>Tareas finalizadas</small>
+            <b style="color: var(--color-primary);">{{ semaforo.finalizadas }}</b>
+        </div>
+        <div>
+            <small>Tareas vencidas</small>
+            <b style="color: var(--color-status-red);">{{ semaforo.vencidas }}</b>
+        </div>
+        <div>
+            <small>Tareas bloqueadas</small>
+            <b style="color: var(--color-status-yellow);">{{ semaforo.bloqueadas }}</b>
+        </div>
+    </div>
+</div>
+
+<!-- DIRECCIONES DEPENDIENTES -->
+<div class="panel">
+    <h3><i class="fa-solid fa-sitemap fa-fw"></i> Direcciones y Dependencias</h3>
+    {% if direcciones %}
+        <div class="info-grid">
+            {% for d in direcciones %}
+            <div>
+                <b>{{ d.nombre }}</b>
+                <small style="margin-top: 4px;">
+                    <i class="fa-solid fa-user-tie fa-fw"></i> {{ d.responsable_nombre|default:"A designar" }}
+                </small>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="muted">No tiene direcciones subordinadas registradas.</p>
+    {% endif %}
+</div>
+
+<!-- TAREAS PROPIAS -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-list-check fa-fw" style="color: var(--blue);"></i> Tareas principales de la secretaría ({{ tareas_propias.count }})</span>
+        <a href="{% url 'tarea_crear' %}" class="btn alt btn-sm">
+            <i class="fa-solid fa-plus fa-fw"></i> Nueva tarea
+        </a>
+    </h3>
+
+    {% if tareas_propias %}
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tarea / Proyecto</th>
+                    <th>Estado</th>
+                    <th>% Físico</th>
+                    <th>% Financiero</th>
+                    <th>Monto Pagado</th>
+                    <th>Fecha Límite</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tareas_propias %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="task-name-link">
+                            {{ t.titulo }}
+                        </a>
+                        <div class="muted">
+                            {% if t.barrio_principal %}
+                                <i class="fa-solid fa-location-dot" style="color: var(--color-primary); margin-right: 3px;"></i>{{ t.barrio_principal.nombre }}
+                            {% else %}
+                                General
+                            {% endif %}
+                            {% if t.prioritario_intendencia %}
+                                · <span style="color: #92400e; font-weight: 700;"><i class="fa-solid fa-star" style="color: #e6a33e;"></i> PRIORITARIO</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if t.estado == 'FINALIZADA' %}
+                            <span class="pill done"><i class="fa-solid fa-check"></i> Finalizada</span>
+                        {% elif t.estado == 'EN_EJECUCION' %}
+                            <span class="pill"><i class="fa-solid fa-play"></i> En ejecución</span>
+                        {% elif t.estado == 'BLOQUEADA' %}
+                            <span class="pill late"><i class="fa-solid fa-ban"></i> Bloqueada</span>
+                        {% elif t.estado == 'PARA_VALIDAR' %}
+                            <span class="pill" style="background:#f3e8ff; color:#7c3aed;"><i class="fa-solid fa-clipboard-check"></i> Por validar</span>
+                        {% else %}
+                            <span class="pill wait"><i class="fa-regular fa-clock"></i> Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td><b>{{ t.porcentaje_fisico }}%</b></td>
+                    <td><b>{{ t.porcentaje_financiero }}%</b></td>
+                    <td><b>${{ t.monto_pagado|floatformat:2 }}</b></td>
+                    <td>
+                        {% if t.fecha_limite %}
+                            <span {% if t.esta_vencida %}style="color: var(--color-status-red); font-weight: 700;"{% endif %}>
+                                <i class="fa-regular fa-calendar-days fa-fw" style="margin-right: 3px;"></i>{{ t.fecha_limite|date:"d/m/Y" }}
+                            </span>
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="btn alt btn-sm" title="Seguimiento">
+                            <i class="fa-solid fa-comments fa-fw"></i> Seguimiento
+                        </a>
+                        <a href="{% url 'tarea_editar' t.pk %}" class="btn alt btn-sm" title="Editar">
+                            <i class="fa-solid fa-pen-to-square fa-fw"></i> Editar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty">
+            <i class="fa-solid fa-folder-open fa-2x" style="color: var(--muted); margin-bottom: 8px; display: block;"></i>
+            No hay tareas principales asignadas a esta secretaría.
+        </div>
+    {% endif %}
+</div>
+
+<!-- TAREAS INTERÁREAS -->
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-handshake fa-fw" style="color: var(--color-primary);"></i> Articulación interáreas (participación secundaria: {{ tareas_interareas.count }})</span>
+    </h3>
+
+    {% if tareas_interareas %}
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tarea / Proyecto</th>
+                    <th>Secretaría Principal</th>
+                    <th>Estado</th>
+                    <th>Fecha Límite</th>
+                    <th style="text-align: right;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tareas_interareas %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="task-name-link">
+                            {{ t.titulo }}
+                        </a>
+                        <div class="muted">
+                            {% if t.barrio_principal %}<i class="fa-solid fa-location-dot" style="margin-right: 3px;"></i>{{ t.barrio_principal.nombre }}{% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-weight: 600;">{{ t.area_principal.nombre }}</span>
+                    </td>
+                    <td>
+                        <span class="pill">{{ t.get_estado_display }}</span>
+                    </td>
+                    <td>{{ t.fecha_limite|date:"d/m/Y"|default:"—" }}</td>
+                    <td style="text-align: right;">
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="btn alt btn-sm">
+                            <i class="fa-solid fa-comments fa-fw"></i> Ver seguimiento
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="empty">
+            <i class="fa-solid fa-people-arrows fa-2x" style="color: var(--muted); margin-bottom: 8px; display: block;"></i>
+            No participa como articulador secundario en proyectos de otras secretarías.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

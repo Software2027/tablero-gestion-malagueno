@@ -1,0 +1,69 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+
+{% block title %}Áreas Municipales{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>Directorio de Áreas y Secretarías</h2>
+        <p>Directorio de dependencias municipales y estado de salud operativa</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'panel_ejecutivo' %}" class="btn alt">
+            <i class="fa-solid fa-chart-line fa-fw"></i> Panel ejecutivo
+        </a>
+    </div>
+</header>
+
+<div class="panel">
+    <h3>
+        <span><i class="fa-solid fa-building-columns fa-fw" style="color: var(--blue);"></i> Dependencias de la Municipalidad de Malagueño</span>
+        <span class="muted" style="font-size: 13px; font-weight: normal;">Total: <b>{{ areas_info|length }} secretarías</b></span>
+    </h3>
+    <p class="muted" style="margin-bottom: 20px;">
+        Seleccione un área para consultar su ficha técnica, avance promedio, desglose presupuestario y tareas activas.
+    </p>
+
+    {% for item in areas_info %}
+    <a href="{% url 'area_detalle' item.area.pk %}" class="area area-link">
+        <div>
+            <b style="font-size: 14px; color: #142d4c;">{{ item.area.nombre }}</b>
+            <div class="muted" style="margin-top: 3px;">
+                <i class="fa-solid fa-user-tie fa-fw" style="margin-right: 3px;"></i>{{ item.area.responsable_nombre|default:"Sin asignar" }} · 
+                <span style="font-weight: 700; color: {{ item.area.color_identificador }};">{{ item.area.codigo }}</span>
+            </div>
+            <div class="muted" style="margin-top: 4px; font-size: 12px;">
+                {{ item.semaforo.mensaje }}
+            </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+            <div style="text-align: right;">
+                <div style="font-size: 12px; font-weight: 700; color: #15395e;">{{ item.semaforo.total_tareas }} tareas</div>
+                <div class="muted">{{ item.semaforo.vencidas }} venc. / {{ item.semaforo.bloqueadas }} bloq.</div>
+            </div>
+
+            <div style="text-align: right; min-width: 90px;">
+                <div style="font-size: 12px; font-weight: 800; color: var(--color-primary);">{{ item.semaforo.porcentaje_cumplimiento }}%</div>
+                <div class="muted">Cumplimiento</div>
+            </div>
+
+            <div>
+                {% if item.semaforo.estado == 'VERDE' %}
+                    <span class="traffic green"><i></i> Al día</span>
+                {% elif item.semaforo.estado == 'AMARILLO' %}
+                    <span class="traffic yellow"><i></i> Atención</span>
+                {% elif item.semaforo.estado == 'ROJO' %}
+                    <span class="traffic red"><i></i> Crítico</span>
+                {% else %}
+                    <span class="traffic gray"><i></i> Sin tareas</span>
+                {% endif %}
+            </div>
+
+            <i class="fa-solid fa-chevron-right" style="color: #94a3b8; font-size: 12px;"></i>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

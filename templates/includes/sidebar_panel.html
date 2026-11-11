@@ -1,0 +1,75 @@
+{% load static %}
+<aside id="sidebarPanel" class="sidebar-aside" style="background-color: #0C3613;">
+    <div class="municipal-brand">
+        <img src="{% static 'img/logo_iso_municipalidad.png' %}" alt="Portal Malagueño" class="brand-iso-logo">
+        <div class="brand-text-block">
+            <div class="brand-title">Panel de Gestión</div>
+            <div class="brand-subtitle">ADMINISTRADOR GENERAL</div>
+        </div>
+        <button type="button" class="sidebar-mobile-close" id="mobileMenuClose" aria-label="Cerrar menú">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+    </div>
+
+    <nav id="nav">
+        <a href="{% url 'panel_ejecutivo' %}" class="nav-btn {% if request.resolver_match.url_name == 'panel_ejecutivo' %}active{% endif %}">
+            <i class="fa-solid fa-chart-line fa-fw"></i> <span>Panel ejecutivo</span>
+        </a>
+
+        <a href="{% url 'tareas_lista' %}" class="nav-btn {% if 'tarea' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fa-solid fa-list-check fa-fw"></i> <span>Tareas de gestión</span>
+        </a>
+
+        <a href="{% url 'areas_lista' %}" class="nav-btn {% if request.resolver_match.url_name == 'areas_lista' or request.resolver_match.url_name == 'area_detalle' %}active{% endif %}">
+            <i class="fa-solid fa-building-columns fa-fw"></i> <span>Áreas municipales</span>
+        </a>
+
+        <a href="{% url 'reportes' %}" class="nav-btn {% if 'reporte' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fa-solid fa-file-invoice fa-fw"></i> <span>Reportes</span>
+        </a>
+
+        {% if user.perfil.rol in 'INTENDENCIA ASESORIA' or user.is_superuser %}
+        <div class="nav-section-title">
+            Administración Superior
+        </div>
+
+        <a href="{% url 'datos_respaldo' %}" class="nav-btn {% if 'respaldo' in request.resolver_match.url_name %}active{% endif %}">
+            <i class="fa-solid fa-database fa-fw"></i> <span>Datos y respaldo</span>
+        </a>
+        {% endif %}
+    </nav>
+
+    {% if user.is_authenticated %}
+    <div class="sidebar-user-footer">
+        <div class="sidebar-user-info">
+            <div class="sidebar-user-header">
+                <div class="sidebar-user-avatar">
+                    <i class="fa-solid fa-user-tie"></i>
+                </div>
+                <div class="sidebar-user-meta">
+                    <div class="sidebar-user-name" title="{{ user.get_full_name|default:user.username }}">
+                        {{ user.get_full_name|default:user.username }}
+                    </div>
+                    <div class="sidebar-user-role">
+                        <span class="user-role-badge">
+                            <i class="fa-solid fa-shield-halved"></i> {{ user.perfil.get_rol_display|default:"Operativo" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% if user.perfil.area %}
+            <div class="sidebar-user-area" title="{{ user.perfil.area.nombre }}">
+                <i class="fa-solid fa-building fa-fw"></i>
+                <span>{{ user.perfil.area.nombre }}</span>
+            </div>
+            {% endif %}
+        </div>
+        <form method="post" action="{% url 'logout' %}" class="sidebar-logout-form">
+            {% csrf_token %}
+            <button type="submit" class="sidebar-logout-btn">
+                <i class="fa-solid fa-right-from-bracket fa-fw"></i> <span>Cerrar sesión</span>
+            </button>
+        </form>
+    </div>
+    {% endif %}
+</aside>

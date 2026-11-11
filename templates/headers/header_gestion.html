@@ -1,0 +1,36 @@
+{% load static %}
+<header class="main-header">
+    <div class="header-brand">
+        <a href="{% url 'panel_ejecutivo' %}" style="text-decoration: none; display: flex; align-items: center; gap: 10px;">
+            <div style="width: 34px; height: 34px; border-radius: 8px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.1rem;">
+                M
+            </div>
+            <div>
+                <h1 class="header-brand-title">Municipalidad de Malagueño</h1>
+                <span class="header-brand-subtitle">Tablero de Control de Gestión</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="header-user-menu">
+        {% if user.is_authenticated %}
+            <span class="badge-rol">
+                {{ user.perfil.get_rol_display|default:"Usuario" }}
+            </span>
+            <span style="font-weight: 500; font-size: 0.9rem;">
+                {{ user.get_full_name|default:user.username }}
+            </span>
+            <form action="{% url 'admin:logout' %}" method="post" style="display: inline;">
+                {% csrf_token %}
+                <button type="submit" style="background: none; border: 1px solid var(--color-border); padding: 6px 12px; border-radius: var(--radius-sm); font-family: inherit; font-size: 0.8rem; cursor: pointer; color: var(--color-text-muted);">
+                    Cerrar Sesión
+                </button>
+            </form>
+        {% else %}
+            <a href="{% url 'admin:login' %}" style="text-decoration: none; color: var(--color-primary); font-weight: 600; font-size: 0.9rem;">
+                Iniciar Sesión
+            </a>
+        {% endif %}
+    </div>
+</header>
+

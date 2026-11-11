@@ -1,0 +1,240 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+
+{% block title %}Tareas de Gestión{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>Tareas y Proyectos de Gestión</h2>
+        <p>Seguimiento general, físico, financiero y territorial del Municipio de Malagueño</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'tarea_crear' %}" class="btn btn-primary" id="nuevo">
+            <i class="fa-solid fa-plus fa-fw"></i> Nueva tarea
+        </a>
+    </div>
+</header>
+
+<!-- FILTROS Y BÚSQUEDA -->
+<div class="filter-card">
+    <form method="get" action="{% url 'tareas_lista' %}">
+        <div class="filter-grid-top">
+            <div class="search-input-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" name="q" placeholder="Buscar por título, responsable o localidad..." value="{{ request.GET.q }}">
+            </div>
+
+            <div>
+                <select name="area" class="filter-select">
+                    <option value="">Todas las áreas</option>
+                    {% for a in areas %}
+                        <option value="{{ a.id }}" {% if request.GET.area == a.id|stringformat:"i" %}selected{% endif %}>
+                            {{ a.nombre }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <select name="estado" class="filter-select">
+                    <option value="">Todos los estados</option>
+                    {% for key, val in estados %}
+                        <option value="{{ key }}" {% if request.GET.estado == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <select name="prioridad" class="filter-select">
+                    <option value="">Todas las prioridades</option>
+                    {% for key, val in prioridades %}
+                        <option value="{{ key }}" {% if request.GET.prioridad == key %}selected{% endif %}>{{ val }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="filter-row-bottom">
+            <div class="filter-chips-group">
+                <label class="filter-chip-toggle chip-warning" title="Filtrar por tareas prioritarias de Intendencia">
+                    <input type="checkbox" name="prioritario" value="1" {% if request.GET.prioritario == '1' %}checked{% endif %}>
+                    <i class="fa-solid fa-star" style="color: #e6a33e;"></i>
+                    <span>Prioritario Intendencia</span>
+                </label>
+
+                <label class="filter-chip-toggle chip-danger" title="Filtrar por tareas cuya fecha límite ya venció">
+                    <input type="checkbox" name="vencidas" value="1" {% if request.GET.vencidas == '1' %}checked{% endif %}>
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i>
+                    <span>Solo vencidas</span>
+                </label>
+            </div>
+
+            <div class="filter-actions">
+                <a href="{% url 'tareas_lista' %}" class="btn alt" title="Limpiar y ver todas las tareas">
+                    <i class="fa-solid fa-rotate-left fa-fw"></i> Limpiar
+                </a>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fa-solid fa-filter fa-fw"></i> Filtrar
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- TABLA DE RESULTADOS -->
+<div class="panel">
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Tarea / Proyecto</th>
+                    <th>Área principal</th>
+                    <th>Responsable</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Avance Físico / Fin.</th>
+                    <th>Monto Pagado / MCA</th>
+                    <th>Vence</th>
+                    <th style="text-align: right; min-width: 190px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in tareas %}
+                <tr>
+                    <td style="font-weight: 700; color: var(--muted);">
+                        #{{ t.id }}
+                    </td>
+                    <td>
+                        <a href="{% url 'tarea_seguimiento' t.pk %}" class="task-name-link">
+                            {{ t.titulo }}
+                        </a>
+                        <div class="muted">
+                            {% if t.prioritario_intendencia %}
+                                <span style="color: #92400e; font-weight: 700;">
+                                    <i class="fa-solid fa-star" style="color: #e6a33e;"></i> PRIORITARIO
+                                </span> · 
+                            {% endif %}
+                            {% if t.barrio_principal %}
+                                <i class="fa-solid fa-location-dot" style="color: var(--color-primary); margin-right: 3px;"></i>{{ t.barrio_principal.nombre }}
+                            {% else %}
+                                General
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        <span style="font-weight: 700; color: {{ t.area_principal.color_identificador }};">
+                            {{ t.area_principal.codigo }}
+                        </span>
+                        {% if t.direccion %}
+                            <div class="muted">{{ t.direccion.nombre }}</div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <i class="fa-solid fa-user fa-fw" style="color: var(--muted); margin-right: 3px;"></i>
+                        {{ t.responsable_operativo|default:"Sin asignar" }}
+                    </td>
+                    <td>
+                        {% if t.estado == 'FINALIZADA' %}
+                            <span class="pill done"><i class="fa-solid fa-check"></i> Finalizada</span>
+                        {% elif t.estado == 'EN_EJECUCION' %}
+                            <span class="pill"><i class="fa-solid fa-play"></i> En ejecución</span>
+                        {% elif t.estado == 'BLOQUEADA' %}
+                            <span class="pill late"><i class="fa-solid fa-ban"></i> Bloqueada</span>
+                        {% elif t.estado == 'PARA_VALIDAR' %}
+                            <span class="pill" style="background:#f3e8ff; color:#7c3aed;"><i class="fa-solid fa-clipboard-check"></i> Para validar</span>
+                        {% else %}
+                            <span class="pill wait"><i class="fa-regular fa-clock"></i> Pendiente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="pill" style="font-size: 10px;">{{ t.get_prioridad_display }}</span>
+                    </td>
+                    <td>
+                        <div style="font-size: 12px;">
+                            Fís: <b>{{ t.porcentaje_fisico }}%</b>
+                        </div>
+                        <div style="font-size: 11px; color: var(--muted);">
+                            Fin: <b>{{ t.porcentaje_financiero }}%</b>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="font-size: 13px; font-weight: 700; color: var(--color-primary);">
+                            ${{ t.monto_pagado|floatformat:2 }}
+                        </div>
+                        <div style="font-size: 11px; color: var(--muted);">
+                            MCA: ${{ t.monto_contractual_actualizado|floatformat:2 }}
+                        </div>
+                    </td>
+                    <td>
+                        {% if t.fecha_limite %}
+                            <div {% if t.esta_vencida %}style="color: var(--color-status-red); font-weight: 700;"{% endif %}>
+                                <i class="fa-regular fa-calendar-days fa-fw" style="margin-right: 3px;"></i>{{ t.fecha_limite|date:"d/m/Y" }}
+                            </div>
+                            {% if t.esta_vencida %}
+                                <span class="pill late" style="font-size: 10px;">Vencida</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="muted">—</span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 5px;">
+                            <a href="{% url 'tarea_seguimiento' t.pk %}" class="btn alt btn-sm" title="Seguimiento e historial">
+                                <i class="fa-solid fa-comments fa-fw"></i> Seguimiento
+                            </a>
+
+                            {% if t.estado == 'PARA_VALIDAR' and user.perfil.rol in 'INTENDENCIA ASESORIA' or user.is_superuser %}
+                                <a href="{% url 'tarea_validar' t.pk %}" class="btn btn-sm" style="background: #7c3aed; color: #fff;" title="Validar resolución">
+                                    <i class="fa-solid fa-clipboard-check fa-fw"></i>
+                                </a>
+                            {% endif %}
+
+                            <a href="{% url 'tarea_editar' t.pk %}" class="btn alt btn-sm" title="Editar tarea">
+                                <i class="fa-solid fa-pen-to-square fa-fw"></i>
+                            </a>
+
+                            <form method="post" action="{% url 'tarea_archivar' t.pk %}" style="display: inline;" onsubmit="return confirm('¿Confirma que desea archivar esta tarea?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn alt btn-sm" style="color: var(--color-status-red);" title="Archivar tarea">
+                                    <i class="fa-solid fa-trash-can fa-fw"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="10">
+                        <div class="empty">
+                            <i class="fa-solid fa-folder-open fa-2x" style="color: var(--muted); margin-bottom: 8px; display: block;"></i>
+                            No se encontraron tareas con los filtros seleccionados.
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
+    {% if is_paginated %}
+    <div style="padding: 16px 0 0; display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: var(--muted); border-top: 1px solid var(--border); margin-top: 14px;">
+        <div>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</div>
+        <div style="display: flex; gap: 8px;">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.area %}&area={{ request.GET.area }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.prioritario %}&prioritario={{ request.GET.prioritario }}{% endif %}{% if request.GET.vencidas %}&vencidas={{ request.GET.vencidas }}{% endif %}" class="btn alt btn-sm">
+                    <i class="fa-solid fa-arrow-left fa-fw"></i> Anterior
+                </a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.area %}&area={{ request.GET.area }}{% endif %}{% if request.GET.estado %}&estado={{ request.GET.estado }}{% endif %}{% if request.GET.prioridad %}&prioridad={{ request.GET.prioridad }}{% endif %}{% if request.GET.prioritario %}&prioritario={{ request.GET.prioritario }}{% endif %}{% if request.GET.vencidas %}&vencidas={{ request.GET.vencidas }}{% endif %}" class="btn alt btn-sm">
+                    Siguiente <i class="fa-solid fa-arrow-right fa-fw"></i>
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

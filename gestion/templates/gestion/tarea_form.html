@@ -1,0 +1,345 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Editar Tarea #{{ form.instance.pk }}{% else %}Nueva Tarea{% endif %}{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>{% if form.instance.pk %}Editar tarea #{{ form.instance.pk }}{% else %}Nueva tarea municipal{% endif %}</h2>
+        <p>Planificación, responsables, ejecución financiera y cobertura territorial</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'tareas_lista' %}" class="btn alt">
+            <i class="fa-solid fa-arrow-left fa-fw"></i> Volver al listado
+        </a>
+    </div>
+</header>
+
+{% if form.errors %}
+<div class="note barrio-warning">
+    <b><i class="fa-solid fa-triangle-exclamation fa-fw"></i> Por favor revise los siguientes errores:</b>
+    <ul style="margin: 8px 0 0 20px;">
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+                <li><strong>{{ field|title }}:</strong> {{ error }}</li>
+            {% endfor %}
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post" id="taskForm">
+    {% csrf_token %}
+
+    <!-- 1. IDENTIFICACIÓN Y RESPONSABLES -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-id-card fa-fw"></i> 1. Identificación y Responsables</h3>
+        
+        <div class="field">
+            <label for="id_titulo">Título de la tarea / intervención <span class="req-star">*</span></label>
+            {{ form.titulo }}
+            {% if form.titulo.errors %}<div class="muted" style="color: var(--color-status-red);">{{ form.titulo.errors }}</div>{% endif %}
+        </div>
+
+        <div class="field">
+            <label for="id_descripcion">Descripción y resultado esperado</label>
+            {{ form.descripcion }}
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_area_principal">Área / Secretaría principal <span class="req-star">*</span></label>
+                {{ form.area_principal }}
+            </div>
+
+            <div class="field">
+                <label for="id_direccion">Dirección ejecutora</label>
+                {{ form.direccion }}
+            </div>
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_responsable_operativo">Responsable operativo (director o encargado)</label>
+                {{ form.responsable_operativo }}
+            </div>
+
+            <div class="field">
+                <label>Seguimiento de Intendencia</label>
+                <label class="priority-toggle">
+                    {{ form.prioritario_intendencia }}
+                    <span><i class="fa-solid fa-star" style="color: #e6a33e; margin-right: 5px;"></i> PRIORITARIO PARA INTENDENCIA</span>
+                </label>
+                <small class="muted">
+                    {% if user.perfil.rol == 'SECRETARIA' %}
+                        Marcador restringido a Intendencia y Asesoría Técnica.
+                    {% else %}
+                        Marque si requiere seguimiento directo del Intendente.
+                    {% endif %}
+                </small>
+            </div>
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_tipo_intervencion">Tipo de intervención</label>
+                {{ form.tipo_intervencion }}
+            </div>
+
+            <div class="field">
+                <label for="id_prioridad">Prioridad operativa <span class="req-star">*</span></label>
+                {{ form.prioridad }}
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="id_areas_intervinientes">Áreas intervinientes (articulación intersecretarías)</label>
+            {{ form.areas_intervinientes }}
+            <small class="muted">Mantenga presionada la tecla Ctrl (o Cmd) para seleccionar varias secretarías participantes.</small>
+        </div>
+    </div>
+
+    <!-- 2. PLANIFICACIÓN Y AVANCES -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-clock-rotate-left fa-fw"></i> 2. Planificación y Avances</h3>
+        
+        <div class="grid2">
+            <div class="field">
+                <label for="id_estado">Estado actual <span class="req-star">*</span></label>
+                {{ form.estado }}
+                {% if form.estado.help_text %}
+                    <small class="muted" style="color: #b45309; font-weight: 600; display: block; margin-top: 4px;">
+                        <i class="fa-solid fa-star fa-fw"></i> {{ form.estado.help_text }}
+                    </small>
+                {% endif %}
+                {% if form.estado.errors %}
+                    <small class="error-msg" style="color: #dc2626; font-weight: 700; display: block; margin-top: 4px;">
+                        <i class="fa-solid fa-triangle-exclamation fa-fw"></i> {{ form.estado.errors.0 }}
+                    </small>
+                {% endif %}
+            </div>
+
+            <div class="field">
+                <label for="id_fecha_limite">Fecha límite prevista</label>
+                {{ form.fecha_limite }}
+            </div>
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_porcentaje_general">Avance general (%)</label>
+                {{ form.porcentaje_general }}
+                <small class="muted">Evaluación general del responsable, independiente del avance físico y financiero.</small>
+            </div>
+
+            <div class="field">
+                <label for="id_porcentaje_fisico">Avance físico (%)</label>
+                {{ form.porcentaje_fisico }}
+                <small class="muted">Porcentaje de obra o meta física certificada en territorio.</small>
+            </div>
+        </div>
+
+        <div class="field">
+            <label>Avance financiero (%) — cálculo automático</label>
+            <input type="text" id="live_avance_financiero" readonly value="{% if form.instance.pk %}{{ form.instance.porcentaje_financiero }}%{% else %}0.00%{% endif %}" style="background: #f8fafc; color: #12395f; font-weight: 700;">
+            <small class="muted">Calculado en tiempo real: (Pagado / Monto Contractual Actualizado) × 100.</small>
+        </div>
+    </div>
+
+    <!-- 3. MATRIZ PRESUPUESTARIA Y FINANCIERA -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-coins fa-fw"></i> 3. Presupuesto y Ejecución Financiera (ARS)</h3>
+        <p class="muted" style="margin-bottom: 16px;">
+            El avance presupuestario se mide por devengado y el avance financiero por pagos realizados. Los importes no deben duplicarse.
+        </p>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_presupuesto_oficial">Presupuesto oficial ($)</label>
+                {{ form.presupuesto_oficial }}
+            </div>
+
+            <div class="field">
+                <label for="id_monto_adjudicado">Monto adjudicado ($)</label>
+                {{ form.monto_adjudicado }}
+            </div>
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_redeterminaciones">Redeterminaciones de precios ($)</label>
+                {{ form.redeterminaciones }}
+            </div>
+
+            <div class="field">
+                <label for="id_ampliaciones">Ampliaciones aprobadas ($)</label>
+                {{ form.ampliaciones }}
+            </div>
+        </div>
+
+        <div class="grid2">
+            <div class="field">
+                <label for="id_monto_devengado">Monto devengado ($)</label>
+                {{ form.monto_devengado }}
+                <small class="muted">Compromisos exigibles de pago.</small>
+            </div>
+
+            <div class="field">
+                <label for="id_monto_pagado">Monto pagado ($)</label>
+                {{ form.monto_pagado }}
+                <small class="muted">Egresos efectivos liquidados.</small>
+            </div>
+        </div>
+
+        <div class="field">
+            <label for="id_pagos_en_tramite">Pagos en trámite / expediente ($)</label>
+            {{ form.pagos_en_tramite }}
+        </div>
+
+        <!-- Resumen Financiero en Vivo -->
+        <div id="liveFinancialBox" class="note" style="margin-top: 14px; background: #f0f7fd; border-color: #bcd7ef; color: #17436c;">
+            <div style="font-weight: 800; margin-bottom: 6px; font-size: 13px;">
+                <i class="fa-solid fa-calculator fa-fw"></i> Balance Calculado en Vivo:
+            </div>
+            <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px;">
+                <span>Monto Contractual (MCA): <b id="liveMca" style="color: #12395f;">$0,00</b></span>
+                <span>Devengado: <b id="liveDevengado" style="color: #12395f;">$0,00</b></span>
+                <span>Pagado: <b id="livePagado" style="color: var(--color-primary);">$0,00</b></span>
+                <span>Devengado Pendiente: <b id="livePendiente" style="color: #92400e;">$0,00</b></span>
+            </div>
+        </div>
+
+        <div id="liveFinancialWarning" class="note barrio-warning" style="display: none; margin-top: 10px;"></div>
+    </div>
+
+    <!-- 4. IMPACTO TERRITORIAL Y BENEFICIARIOS -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-location-dot fa-fw"></i> 4. Impacto Territorial y Beneficiarios</h3>
+        <p class="muted" style="margin-bottom: 16px;">
+            Seleccione el barrio principal para asignar la inversión una sola vez. Puede indicar barrios adicionales sin duplicar montos.
+        </p>
+
+        <div class="field" style="margin-bottom: 16px;">
+            <label for="id_barrio_principal">Barrio principal <span class="req-star">*</span></label>
+            {{ form.barrio_principal }}
+        </div>
+
+        <!-- Alerta de Referencia Catastral del Barrio en Rojo -->
+        <div id="alertaBarrioReferencia" style="display: none; margin-bottom: 20px; padding: 14px 18px; border: 1.5px solid #dc2626; border-radius: 12px; background: #ffffff; color: #991b1b; font-size: 13.5px; line-height: 1.5;">
+            <b>ATENCIÓN — DATO DE REFERENCIA:</b> <span id="refBarrioNombre">17 de Octubre</span> tiene <b id="refBarrioViviendas">153</b> <b>viviendas edificadas</b> según el relevamiento municipal. <b>Esto NO significa que todas estén beneficiadas por esta tarea.</b> Ingresá únicamente las viviendas efectivamente alcanzadas de forma directa o indirecta. Si es una capacitación, reparación puntual u otra actividad sin viviendas beneficiadas, dejá ambos campos en 0. No se calculan beneficiarios automáticamente por elegir un barrio.
+        </div>
+
+        <div class="field" style="margin-bottom: 16px;">
+            <label for="id_modalidad_beneficiarios">Modalidad de beneficiarios</label>
+            {{ form.modalidad_beneficiarios }}
+            <small class="muted" style="display: block; margin-top: 6px; font-size: 12px; color: #64748b;">
+                Elegí cómo se mide el alcance de ESTA tarea. No se suman personas estimadas por viviendas y personas individuales para la misma intervención.
+            </small>
+        </div>
+
+        <!-- 1. Bloque: Por viviendas alcanzadas -->
+        <div id="bloqueModalidadViviendas">
+            <div class="grid2">
+                <div class="field">
+                    <label for="id_viviendas_directas">Viviendas beneficiadas directamente</label>
+                    {{ form.viviendas_directas }}
+                </div>
+                <div class="field">
+                    <label for="id_viviendas_indirectas">Viviendas beneficiadas indirectamente</label>
+                    {{ form.viviendas_indirectas }}
+                </div>
+            </div>
+
+            <div class="grid2" style="margin-top: 14px;">
+                <div class="field">
+                    <label for="calc_habitantes_directos">Habitantes beneficiados directamente (× 3,5)</label>
+                    <input type="text" id="calc_habitantes_directos" class="form-input" readonly value="0" style="background: #f8fafc; color: #334155; font-weight: 600; cursor: default;">
+                </div>
+                <div class="field">
+                    <label for="calc_habitantes_indirectos">Habitantes beneficiados indirectamente (× 3,5)</label>
+                    <input type="text" id="calc_habitantes_indirectos" class="form-input" readonly value="0" style="background: #f8fafc; color: #334155; font-weight: 600; cursor: default;">
+                </div>
+            </div>
+
+            <small class="muted" style="display: block; margin-top: 8px; font-size: 12px; color: #64748b;">
+                Estimación de 3,5 habitantes por vivienda, redondeada a personas enteras. La referencia del barrio no equivale automáticamente a viviendas alcanzadas por esta intervención.
+            </small>
+        </div>
+
+        <!-- 2. Bloque: Por personas individuales -->
+        <div id="bloqueModalidadPersonas" style="display: none;">
+            <div class="grid2">
+                <div class="field">
+                    <label for="id_personas_directas">Personas beneficiadas directamente</label>
+                    {{ form.personas_directas }}
+                </div>
+                <div class="field">
+                    <label for="id_personas_indirectas">Personas beneficiadas indirectamente</label>
+                    {{ form.personas_indirectas }}
+                </div>
+            </div>
+
+            <small class="muted" style="display: block; margin-top: 8px; font-size: 12px; color: #64748b;">
+                Cargá personas reales o estimadas según la actividad; no se convierten en viviendas. Si una misma persona participa varias veces, procurá contarla una sola vez dentro de esta tarea.
+            </small>
+        </div>
+
+        <!-- 3. Bloque: Sin beneficiarios cuantificados -->
+        <div id="bloqueModalidadSinDato" style="display: none; padding: 10px 0;">
+            <p style="color: #64748b; font-size: 13px; margin: 0;">
+                Esta tarea todavía no tiene una cantidad de beneficiarios informada.
+            </p>
+        </div>
+
+        <!-- Campo técnico unificado oculto -->
+        {{ form.cantidad_beneficiarios_input }}
+
+        <div class="grid2" style="margin-top: 16px;">
+            <div class="field">
+                <label for="id_link_google_maps">Enlace de ubicación en Google Maps</label>
+                {{ form.link_google_maps }}
+            </div>
+            <div class="field">
+                <label for="id_barrios_adicionales">Barrios adicionales alcanzados</label>
+                {{ form.barrios_adicionales }}
+                <small class="muted">Los barrios adicionales no computan inversión para no duplicar datos estadísticos.</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. OBSERVACIONES Y JUSTIFICACIÓN -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-comment-dots fa-fw"></i> 5. Observaciones y Justificación</h3>
+        
+        <div class="field">
+            <label for="id_observaciones">Observaciones / Motivo de bloqueo</label>
+            {{ form.observaciones }}
+            <small class="muted" style="color: #92400e; font-weight: 600;">
+                <i class="fa-solid fa-circle-info"></i> Si el estado es "BLOQUEADA", la justificación en este campo es de llenado obligatorio.
+            </small>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <a href="{% url 'tareas_lista' %}" class="btn alt">
+                <i class="fa-solid fa-xmark fa-fw"></i> Cancelar
+            </a>
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-floppy-disk fa-fw"></i> Guardar tarea
+            </button>
+        </div>
+    </div>
+</form>
+
+{% if mapa_direcciones_json %}
+<script id="mapaDireccionesData" type="application/json">
+{{ mapa_direcciones_json|safe }}
+</script>
+{% endif %}
+
+{% if mapa_barrios_json %}
+<script id="mapaBarriosData" type="application/json">
+{{ mapa_barrios_json|safe }}
+</script>
+{% endif %}
+{% endblock %}

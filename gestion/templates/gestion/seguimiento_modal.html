@@ -1,0 +1,225 @@
+{% extends 'base/base_panel.html' %}
+{% load static %}
+{% load l10n %}
+
+{% block title %}Seguimiento · {{ tarea.titulo }}{% endblock %}
+
+{% block content %}
+<header>
+    <div>
+        <h2>Seguimiento de tarea #{{ tarea.id }}</h2>
+        <p>{{ tarea.titulo }}</p>
+    </div>
+    <div class="actions">
+        <a href="{% url 'tareas_lista' %}" class="btn alt">
+            <i class="fa-solid fa-arrow-left fa-fw"></i> Volver a tareas
+        </a>
+        <a href="{% url 'tarea_editar' tarea.pk %}" class="btn btn-primary">
+            <i class="fa-solid fa-pen-to-square fa-fw"></i> Editar tarea
+        </a>
+    </div>
+</header>
+
+<div style="max-width: 980px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px;">
+
+    <!-- 1. CARD: AVANCES DE LA TAREA -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-chart-line fa-fw"></i> Avances de la tarea</h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+            <!-- Avance General -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #1e293b;">
+                    <span>Avance general</span>
+                    <span>{{ tarea.porcentaje_general }}%</span>
+                </div>
+                <div style="width: 100%; height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+                    <div style="width: {{ tarea.porcentaje_general|unlocalize }}%; height: 100%; background: #2563eb; border-radius: 999px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Avance Físico -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #1e293b;">
+                    <span>Avance físico</span>
+                    <span>{{ tarea.porcentaje_fisico }}%</span>
+                </div>
+                <div style="width: 100%; height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+                    <div style="width: {{ tarea.porcentaje_fisico|unlocalize }}%; height: 100%; background: #16a34a; border-radius: 999px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+
+            <!-- Avance Financiero -->
+            <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: #1e293b;">
+                    <span>Avance financiero</span>
+                    <span>{{ tarea.porcentaje_financiero }}%</span>
+                </div>
+                <div style="width: 100%; height: 9px; background: #e2e8f0; border-radius: 999px; overflow: hidden;">
+                    <div style="width: {{ tarea.porcentaje_financiero|unlocalize }}%; height: 100%; background: #b45309; border-radius: 999px; transition: width 0.3s ease;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid #f1f5f9; font-size: 12px; color: #64748b;">
+            <p style="margin: 0 0 4px 0; font-weight: 700; color: #475569;">Avances declarados por el responsable</p>
+            <p style="margin: 0;">
+                Para modificar el porcentaje, utilizá 
+                <a href="{% url 'tarea_editar' tarea.pk %}" style="font-weight: 700; color: #0C3613; text-decoration: underline;">Editar tarea</a>. 
+                El avance debe respaldarse con información o evidencia.
+            </p>
+        </div>
+    </div>
+
+    <!-- 2. CARD: SEGUIMIENTO DE LA TAREA (HISTORIAL DE ACTUALIZACIONES) -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-comments fa-fw"></i> Seguimiento de la tarea</h3>
+        <p class="muted" style="margin-bottom: 18px; font-size: 13px;">
+            Cada actualización reúne el comentario y sus fotos, videos o documentos. Las más recientes aparecen primero.
+        </p>
+
+        {% if comentarios %}
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+                {% for c in comentarios %}
+                <div style="background: #ffffff; border: 1px solid #dce5ef; border-radius: 12px; padding: 16px 18px; box-shadow: 0 1px 4px rgba(0,0,0,0.03);">
+                    <!-- Cabecera de la Actualización -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                            <span style="font-size: 12px; color: #64748b;">
+                                <i class="fa-regular fa-clock fa-fw"></i> {{ c.created_at|date:"d/m/Y, H:i:s" }}
+                            </span>
+                            <span style="font-size: 12px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.04em;">
+                                {{ c.quien_comenta|default:c.autor.username }}
+                            </span>
+                        </div>
+                        <span class="pill" style="background: #f1f5f9; color: #334155; font-size: 11px; font-weight: 700;">
+                            <i class="fa-regular fa-message fa-fw"></i> Comentario
+                        </span>
+                    </div>
+
+                    <!-- Mensaje / Texto del Comentario -->
+                    <div style="font-size: 13px; color: #1e293b; line-height: 1.5; white-space: pre-wrap; margin-bottom: 12px;">{{ c.mensaje }}</div>
+
+                    <!-- Archivos y Evidencias Vinculadas -->
+                    {% if c.archivos.all %}
+                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed #e2e8f0;">
+                            <div style="font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; text-transform: uppercase;">
+                                <i class="fa-solid fa-paperclip fa-fw"></i> Evidencias adjuntas ({{ c.archivos.count }})
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                                {% for a in c.archivos.all %}
+                                <a href="{{ a.archivo.url }}" target="_blank" class="btn alt btn-sm" style="font-size: 12px; text-decoration: none; padding: 6px 12px; display: inline-flex; align-items: center; gap: 6px;">
+                                    <i class="fa-solid fa-file-arrow-down fa-fw" style="color: #0C3613;"></i>
+                                    <span>{{ a.nombre_original }}</span>
+                                    <small style="color: #94a3b8;">({{ a.tamano_megabytes|floatformat:1 }} MB)</small>
+                                </a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    <!-- Requerimiento pendiente o resuelto -->
+                    {% if c.requiere_respuesta %}
+                        <div style="margin-top: 12px; padding: 9px 13px; border-radius: 8px; font-size: 12px; display: flex; justify-content: space-between; align-items: center; {% if c.resuelto %}background-color: #dcfce7; color: #166534;{% else %}background-color: #fef3c7; color: #92400e; font-weight: 700;{% endif %}">
+                            <span>
+                                {% if c.resuelto %}
+                                    <i class="fa-solid fa-circle-check fa-fw"></i> Requerimiento resuelto
+                                {% else %}
+                                    <i class="fa-solid fa-hourglass-half fa-fw"></i> Requiere respuesta / intervención superior
+                                {% endif %}
+                            </span>
+
+                            {% if not c.resuelto %}
+                            <form method="post" action="{% url 'tarea_seguimiento' tarea.pk %}" style="margin: 0;">
+                                {% csrf_token %}
+                                <input type="hidden" name="tipo_accion" value="resolver_requerimiento">
+                                <input type="hidden" name="comentario_id" value="{{ c.id }}">
+                                <button type="submit" class="btn alt btn-sm" style="font-size: 11px; padding: 4px 10px;">
+                                    <i class="fa-solid fa-check fa-fw"></i> Marcar resuelto
+                                </button>
+                            </form>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div style="text-align: center; padding: 24px; color: #64748b; background: #f8fafc; border-radius: 10px; border: 1px dashed #cbd5e1;">
+                <i class="fa-solid fa-clipboard-list fa-2x" style="color: #94a3b8; margin-bottom: 8px; display: block;"></i>
+                No hay actualizaciones registradas aún para esta tarea.
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- 3. CARD: NUEVA ACTUALIZACIÓN (FORMULARIO UNIFICADO CON UN SOLO BOTÓN) -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-pen-nib fa-fw"></i> Nueva actualización</h3>
+
+        <form method="post" enctype="multipart/form-data" action="{% url 'tarea_seguimiento' tarea.pk %}">
+            {% csrf_token %}
+            
+            <!-- Comentario -->
+            <div class="field">
+                <label for="id_mensaje">Comentario <span class="req-star">*</span></label>
+                {{ actualizacion_form.mensaje }}
+            </div>
+
+            <!-- Quién comenta -->
+            <div class="field">
+                <label for="id_quien_comenta">Quién comenta</label>
+                {{ actualizacion_form.quien_comenta }}
+            </div>
+
+            <!-- Adjuntar fotos, videos o documentos -->
+            <div class="field">
+                <label for="id_archivos">Adjuntar fotos, videos o documentos (opcional)</label>
+                <input type="file" name="archivos" id="id_archivos" multiple class="form-file-input" accept=".pdf,.jpg,.jpeg,.png,.webp,.mp4,.mov,.xlsx,.docx">
+                <small class="muted" style="margin-top: 4px;">
+                    Podés seleccionar uno o varios archivos a la vez. Máximo <b>40 MB</b> por archivo. Los nombres se normalizan automáticamente a minúsculas y se guardan divididos por tarea y fecha.
+                </small>
+            </div>
+
+            <!-- Requiere respuesta -->
+            <div style="margin: 14px 0 20px 0;">
+                <label style="display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; cursor: pointer; color: #334155;">
+                    {{ actualizacion_form.requiere_respuesta }}
+                    <span>Requiere respuesta</span>
+                </label>
+            </div>
+
+            <!-- Botón principal de guardado unificado -->
+            <div>
+                <button type="submit" class="btn btn-primary" style="padding: 12px 24px; font-size: 14px;">
+                    <i class="fa-solid fa-paper-plane fa-fw"></i> Publicar actualización
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 4. CARD: HISTORIAL CRONOLÓGICO -->
+    <div class="panel">
+        <h3><i class="fa-solid fa-timeline fa-fw"></i> Historial</h3>
+
+        <div style="position: relative; padding-left: 18px; border-left: 2px solid #e2e8f0; display: flex; flex-direction: column; gap: 16px; margin-top: 14px; margin-left: 6px;">
+            {% for ev in historial_eventos %}
+            <div style="position: relative; font-size: 13px; color: #334155;">
+                <!-- Puntero visual -->
+                <div style="position: absolute; left: -24px; top: 5px; width: 10px; height: 10px; border-radius: 50%; background: #0C3613; border: 2px solid #ffffff; box-shadow: 0 0 0 2px #cbd5e1;"></div>
+                
+                <div style="display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap;">
+                    <span style="font-weight: 700; color: #0f172a;">{{ ev.titulo }}</span>
+                    <span style="color: #64748b; font-size: 12px;">· {{ ev.fecha|date:"d/m/Y, H:i:s" }}</span>
+                </div>
+                {% if ev.detalle %}
+                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">{{ ev.detalle }}</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <div style="color: #64748b; font-size: 13px;">Sin eventos históricos registrados.</div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}
